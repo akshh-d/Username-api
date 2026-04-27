@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Username Generator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+
+body{
+  background: linear-gradient(135deg,#0f172a,#020617);
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:500px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+
+h1{
+  text-align:center;
+  font-size:26px;
+  margin-bottom:8px;
+}
+
+.sub{
+  text-align:center;
+  font-size:14px;
+  color:#aaa;
+  margin-bottom:20px;
+}
+
+.grid{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+input,select{
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:#020617;
+  color:#fff;
+  font-size:14px;
+}
+
+input:focus,select:focus{
+  outline:2px solid #6366f1;
+}
+
+button{
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:scale(1.05);
+}
+
+.results{
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:12px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.card button{
+  background:#6366f1;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+}
+
+.loader{
+  text-align:center;
+  margin-top:15px;
+  color:#aaa;
+}
+
+.msg{
+  text-align:center;
+  margin-top:10px;
+  color:#22c55e;
+  height:20px;
+}
+
+/* Mobile Optimization */
+@media(max-width:500px){
+  .container{
+    padding:20px;
+  }
+  h1{
+    font-size:22px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>✨ Username Generator</h1>
+  <p class="sub">AI-powered username creation</p>
+
+  <div class="grid">
+    <input id="name" placeholder="Enter your name">
+
+    <select id="niche">
+      <option value="gaming">🎮 Gaming</option>
+      <option value="fitness">💪 Fitness</option>
+      <option value="business">💼 Business</option>
+      <option value="fashion">👗 Fashion</option>
+    </select>
+
+    <select id="style">
+      <option value="cool">😎 Cool</option>
+      <option value="luxury">💎 Luxury</option>
+      <option value="minimal">⚡ Minimal</option>
+      <option value="funny">😂 Funny</option>
+    </select>
+
+    <button onclick="generate()">Generate 🚀</button>
+  </div>
+
+  <div id="loader" class="loader"></div>
+  <div id="results" class="results"></div>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const API_URL = "http://localhost:3000/generate";
+// after deploy → replace with your live API
+
+async function generate(){
+  const name = document.getElementById("name").value;
+  const niche = document.getElementById("niche").value;
+  const style = document.getElementById("style").value;
+
+  const loader = document.getElementById("loader");
+  const results = document.getElementById("results");
+
+  loader.innerText = "✨ Generating...";
+  results.innerHTML = "";
+
+  try{
+    const res = await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name,niche,style})
+    });
+
+    const data = await res.json();
+    loader.innerText = "";
+
+    data.usernames.forEach(u=>{
+      const div = document.createElement("div");
+      div.className="card";
+
+      div.innerHTML=`
+        <span>@${u}</span>
+        <button onclick="copyText('${u}')">Copy</button>
+      `;
+
+      results.appendChild(div);
+    });
+
+  }catch(err){
+    loader.innerText = "⚠️ API error";
+  }
+}
+
+function copyText(text){
+  navigator.clipboard.writeText(text);
+  document.getElementById("msg").innerText="Copied: @"+text;
+
+  setTimeout(()=>{
+    document.getElementById("msg").innerText="";
+  },1200);
+}
+</script>
+
+</body>
+</html>
